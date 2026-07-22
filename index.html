@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuFlo Project Planner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccd1d1;
+            border-radius: 8px;
+            font-size: 1em;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            white-space: nowrap;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .results-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .result-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .result-card h2 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+        .result-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .result-card ul li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .result-card ul li::before {
+            content: '•';
+            color: #4CAF50;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        .result-card ol {
+            padding-left: 20px;
+        }
+        .result-card ol li {
+            margin-bottom: 10px;
+        }
+        .result-card a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .result-card a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .input-section {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RuFlo Project Planner</h1>
+
+        <div class="input-section">
+            <input type="text" id="itemInput" placeholder="Enter the item you want a plan for (e.g., 'RC car', 'Dodge Charger engine')">
+            <button id="generatePlanButton">Generate Plan</button>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner"></div>
+
+        <div id="results" class="results-section hidden">
+            <div class="result-card">
+                <h2>Project Plan for <span id="planItemName"></span></h2>
+                <p id="projectPlanContent"></p>
+            </div>
+
+            <div class="result-card">
+                <h2>Estimated Time</h2>
+                <p id="estimatedTimeContent"></p>
+            </div>
+
+            <div class="result-card">
+                <h2>Parts List & Purchase Links</h2>
+                <ul id="partsListContent"></ul>
+            </div>
+
+            <div class="result-card">
+                <h2>Step-by-Step Guide</h2>
+                <ol id="stepByStepGuideContent"></ol>
+            </div>
+
+            <div class="result-card">
+                <h2>Schematic</h2>
+                <div id="schematicContent">
+                    <p><em>(Schematic image or detailed diagram for <span id="schematicItemName"></span> would appear here)</em></p>
+                    <img id="schematicImage" src="" alt="Schematic Placeholder" style="max-width: 100%; height: auto; display: none; border: 1px dashed #ccc; padding: 10px; margin-top: 15px; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generatePlanButton').addEventListener('click', generatePlan);
+
+        function generatePlan() {
+            const itemInput = document.getElementById('itemInput');
+            const itemName = itemInput.value.trim();
+            const resultsSection = document.getElementById('results');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            if (itemName === '') {
+                alert('Please enter an item to generate a plan.');
+                return;
+            }
+
+            resultsSection.classList.add('hidden');
+            loadingSpinner.style.display = 'block';
+
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                resultsSection.classList.remove('hidden');
+
+                document.getElementById('planItemName').textContent = itemName;
+                document.getElementById('schematicItemName').textContent = itemName;
+
+                document.getElementById('projectPlanContent').innerHTML = `
+                    <h3>Phase 1: Research & Planning</h3>
+                    <ul>
+                        <li>Understand the current state and desired outcome of the ${itemName}.</li>
+                        <li>Gather detailed specifications and requirements.</li>
+                        <li>Identify potential challenges and solutions.</li>
+                    </ul>
+                    <h3>Phase 2: Parts Acquisition</h3>
+                    <ul>
+                        <li>Source and order all necessary components based on the parts list.</li>
+                        <li>Verify compatibility and quality of purchased parts.</li>
+                    </ul>
+                    <h3>Phase 3: Assembly & Construction</h3>
+                    <ul>
+                        <li>Follow the step-by-step guide for careful assembly.</li>
+                        <li>Perform intermediate tests as required.</li>
+                    </ul>
+                    <h3>Phase 4: Testing & Refinement</h3>
+                    <ul>
+                        <li>Conduct thorough functional testing of the completed ${itemName}.</li>
+                        <li>Troubleshoot any issues and refine performance.</li>
+                    </ul>
+                `;
+
+                document.getElementById('estimatedTimeContent').textContent = `Based on complexity, the estimated time to complete the project for '${itemName}' is approximately 1-3 weeks, assuming readily available parts and average skill level.`;
+
+                const partsList = document.getElementById('partsListContent');
+                partsList.innerHTML = '';
+                const exampleParts = [
+                    { name: 'Microcontroller Unit (MCU)', link: 'https://example.com/mcu' },
+                    { name: 'Power Supply Module', link: 'https://example.com/power-supply' },
+                    { name: 'Sensors (e.g., Accelerometer, Gyro)', link: 'https://example.com/sensors' },
+                    { name: 'Wiring Kit & Connectors', link: 'https://example.com/wiring' },
+                    { name: 'Enclosure or Chassis components', link: 'https://example.com/enclosure' }
+                ];
+                exampleParts.forEach(part => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${part.name}: <a href="${part.link}" target="_blank">${part.link}</a>`;
+                    partsList.appendChild(li);
+                });
+
+                const stepByStepGuide = document.getElementById('stepByStepGuideContent');
+                stepByStepGuide.innerHTML = '';
+                const exampleSteps = [
+                    '<strong>Step 1: Component Inventory & Preparation</strong> - Unpack and verify all received parts against the parts list. Organize components for easy access.',
+                    '<strong>Step 2: Core Assembly (e.g., Main Board)</strong> - Assemble the primary circuit board, soldering components as per the schematic. Pay attention to polarity and pin assignments.',
+                    '<strong>Step 3: Power System Integration</strong> - Connect the power supply to the main board. Perform a preliminary power-on test to check for shorts or immediate issues (without connecting sensitive components).',
+                    '<strong>Step 4: Sensor & Peripheral Connection</strong> - Attach all sensors, motors, or other peripherals to the microcontroller, following the schematic\'s I/O pin assignments.',
+                    '<strong>Step 5: Enclosure/Chassis Assembly</strong> - Mount all assembled components within the chosen enclosure or chassis. Ensure secure fitting and proper wire routing to prevent pinching.',
+                    '<strong>Step 6: Initial Firmware/Software Upload</strong> - Upload the initial operating firmware or software to the microcontroller. Test basic functionalities like power, connectivity, and simple input/output.',
+                    '<strong>Step 7: Calibration & Functional Testing</strong> - Perform detailed calibration of sensors and extensive functional testing. Refer to the schematic and expected behaviors to troubleshoot.',
+                    '<strong>Step 8: Final Adjustments & Refinements</strong> - Make any necessary physical or software adjustments for optimal performance. Document changes and finalize the project.'
+                ];
+                exampleSteps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.innerHTML = step;
+                    stepByStepGuide.appendChild(li);
+                });
+
+                const schematicImage = document.getElementById('schematicImage');
+                schematicImage.src = `https://via.placeholder.com/600x400?text=Schematic+for+${encodeURIComponent(itemName)}`;
+                schematicImage.style.display = 'block';
+
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
