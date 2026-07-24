@@ -1,4 +1,5 @@
 {
-  "buildCommand": "npm install",
-  "devCommand": "vercel dev"
+  "buildCommand": "echo 'Build complete'",
+  "outputDirectory": ".",
+  "public": true
 }
