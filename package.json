@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "AI-powered project planner",
   "scripts": {
-    "build": "mkdir -p public && cp index.html public/",
-    "dev": "vercel dev",
-    "start": "vercel start"
+    "build": "mkdir -p .vercel/output/static && cp index.html .vercel/output/static/index.html"
   },
   "dependencies": {
     "@google/generative-ai": "^0.3.0"
