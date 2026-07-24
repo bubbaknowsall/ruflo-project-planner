@@ -2,10 +2,9 @@
   "name": "ruflo-project-planner",
   "version": "1.0.0",
   "description": "AI-powered project planner",
-  "main": "api/generate-plan.js",
   "scripts": {
+    "build": "mkdir -p public && cp index.html public/",
     "dev": "vercel dev",
-    "build": "vercel build",
     "start": "vercel start"
   },
   "dependencies": {
